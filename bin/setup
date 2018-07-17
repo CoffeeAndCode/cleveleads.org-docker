@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -ex
+
+# Drop any existing database tables
+docker run -it --rm --volumes-from cleveleadsorg-docker_wordpress_1 --network container:cleveleadsorg-docker_wordpress_1 wordpress:cli db reset
+
+# Import backup.sql database
+cat ./backup.sql | docker run -i --rm --volumes-from cleveleadsorg-docker_wordpress_1 --network container:cleveleadsorg-docker_wordpress_1 wordpress:cli db import -
+
+# Replace strings in database to support local install
+docker run -it --rm --volumes-from cleveleadsorg-docker_wordpress_1 --network container:cleveleadsorg-docker_wordpress_1 wordpress:cli search-replace '/srv/users/clcuser/apps/cleveleads/public/wp-content' '/var/www/html/wp-content' --skip-columns=guid --all-tables
+docker run -it --rm --volumes-from cleveleadsorg-docker_wordpress_1 --network container:cleveleadsorg-docker_wordpress_1 wordpress:cli search-replace 'https://www.cleveleads.org' 'http://localhost:8080' --skip-columns=guid --all-tables
+docker run -it --rm --volumes-from cleveleadsorg-docker_wordpress_1 --network container:cleveleadsorg-docker_wordpress_1 wordpress:cli search-replace 'http://www.cleveleads.org' 'http://localhost:8080' --skip-columns=guid --all-tables
+
+# Update WP config to support local install
+docker run -it --rm --volumes-from cleveleadsorg-docker_wordpress_1 --network container:cleveleadsorg-docker_wordpress_1 wordpress:cli option update home 'http://localhost:8080'
+docker run -it --rm --volumes-from cleveleadsorg-docker_wordpress_1 --network container:cleveleadsorg-docker_wordpress_1 wordpress:cli option update siteurl 'http://localhost:8080'
+
+# Check that database is working properly
+docker run -it --rm --volumes-from cleveleadsorg-docker_wordpress_1 --network container:cleveleadsorg-docker_wordpress_1 wordpress:cli db check

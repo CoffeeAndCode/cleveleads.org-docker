@@ -1,0 +1,23 @@
+version: '3.3'
+
+services:
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: givecamp
+    volumes:
+      - db_data:/var/lib/mysql
+
+  wordpress:
+    image: wordpress:4.9-apache
+    environment:
+      WORDPRESS_DB_PASSWORD: givecamp
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src/platform:/var/www/html/platform
+      - ./src/platform_api:/var/www/html/platform_api
+      - ./src/wp-content:/var/www/html/wp-content
+
+volumes:
+  db_data: {}
