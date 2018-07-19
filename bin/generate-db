@@ -3,10 +3,10 @@
 set -ex
 
 FIND_DOMAIN="www.cleveleads.org"
-REPLACE_DOMAIN="http://localhost:8080"
+REPLACE_DOMAIN="http://gc-cleveleads.dreamhosters.com"
 
 FIND_PATH="/srv/users/clcuser/apps/cleveleads/public/wp-content"
-REPLACE_PATH="/var/www/html/wp-content"
+REPLACE_PATH="/home/coffeeandcode/cleveleads.org/wp-content"
 
 # Drop any existing database tables
 docker run -it --rm --volumes-from cleveleadsorg-docker_wordpress_1 --network container:cleveleadsorg-docker_wordpress_1 wordpress:cli db reset
@@ -25,3 +25,6 @@ docker run -it --rm --volumes-from cleveleadsorg-docker_wordpress_1 --network co
 
 # Check that database is working properly
 docker run -it --rm --volumes-from cleveleadsorg-docker_wordpress_1 --network container:cleveleadsorg-docker_wordpress_1 wordpress:cli db check
+
+# Export database to desktop
+docker run -it --rm --volumes-from cleveleadsorg-docker_wordpress_1 --network container:cleveleadsorg-docker_wordpress_1 wordpress:cli db export - | tee ~/Desktop/export.sql
